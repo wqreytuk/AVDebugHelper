@@ -10,7 +10,7 @@ Signature   = "$Windows NT$"
 Class       = "ContentScreener"                         ;This is determined by the work this filter driver does
 ClassGuid   = {3e3f0674-c83c-4558-bb26-9820e1eba5c5}    ;This value is determined by the Class
 Provider    = %ProviderString%
-DriverVer = 08/08/2025,10.24.21.402
+DriverVer = 08/08/2025,14.28.28.938
 CatalogFile = obcallbacktest.cat
 PnpLockdown = 1
 

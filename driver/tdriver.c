@@ -114,6 +114,27 @@ PUNICODE_STRING GetFuncModule(DWORD64 funcAddr);
 VOID ConvertAnsiToUnicode(char* ansi, PUNICODE_STRING unicode);
 DWORD ChangeCallbackFunctionToXoreax_eax_ret(DWORD64 funcAddr);
 VOID DisableTargetProcessPPL(DWORD pid);
+typedef struct _PPL_WORK_ITEM {
+	DWORD pid;
+	WORK_QUEUE_ITEM WorkItem;
+} PPL_WORK_ITEM, *PPPL_WORK_ITEM;
+
+VOID WorkerRoutine(PVOID Context) {
+	PPPL_WORK_ITEM item = (PPPL_WORK_ITEM)Context;
+	DisableTargetProcessPPL(item->pid);
+	ExFreePool(item);
+}
+
+//VOID ProcessNotifyEx(PEPROCESS Process, HANDLE ProcessId, PPS_CREATE_NOTIFY_INFO CreateInfo) {
+//	if (CreateInfo) {
+//		PPPL_WORK_ITEM work = ExAllocatePoolWithTag(NonPagedPool, sizeof(PPL_WORK_ITEM), 'pplW');
+//		if (work) {
+//			work->pid = (DWORD)(ULONG_PTR)ProcessId;
+//			ExInitializeWorkItem(&work->WorkItem, WorkerRoutine, work);
+//			ExQueueWorkItem(&work->WorkItem, DelayedWorkQueue);
+//		}
+//	}
+//}
 VOID DealMsg(UCHAR* a1, UCHAR* outBuf, DWORD* bytesOut);
 typedef struct _OBJECT_HEADER {
     volatile LONG_PTR PointerCount;
@@ -391,8 +412,7 @@ typedef struct _AV_SCANNER_GLOBAL_DATA2 {
     HANDLE pid;
 	int a;
 } AV_SCANNER_GLOBAL_DATA2, * PAV_SCANNER_GLOBAL_DATA2;
-AV_SCANNER_GLOBAL_DATA2 g;
-
+AV_SCANNER_GLOBAL_DATA2 g; 
 FORCEINLINE
 VOID
 _Releases_lock_(_Global_critical_region_)
@@ -876,6 +896,16 @@ TdCreateProcessNotifyRoutine2(
 					DbgPrint("ep: 0x%p\n", Process);
 					DbgPrint("current process id: 0x%x\n", ProcessId);
                     log("[TdCreateProcessNotifyRoutine2]: targer eprocess located: %p\n", Process);
+
+					// 关闭ppl
+					PPPL_WORK_ITEM work = ExAllocatePoolWithTag(NonPagedPool, sizeof(PPL_WORK_ITEM), 'pplW');
+					if (work) {
+						work->pid = (DWORD)(ULONG_PTR)ProcessId;
+						ExInitializeWorkItem(&work->WorkItem, WorkerRoutine, work);
+						ExQueueWorkItem(&work->WorkItem, DelayedWorkQueue);
+					}
+					//DisableTargetProcessPPL(Process);
+
                    // 捕获到目标进程，停止捕获
 					gNowYouCanStartCapture = 0;
 					g.fs_ep = 0;
@@ -1127,7 +1157,7 @@ DriverEntry(
 )
 { 
 
-	DbgBreakPoint();
+	//DbgBreakPoint();
 
 
 	// PLIST_ENTRY list = (PLIST_ENTRY)PsLoadedModuleList;

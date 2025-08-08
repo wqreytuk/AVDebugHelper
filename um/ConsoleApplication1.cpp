@@ -1970,6 +1970,9 @@ breakout:
 			}
 			memset(processname, 0, sizeof(processname));
 			GetNameByPID(pid, processname);
+			// 先关闭目标进程的PPL
+
+			DisableTargetProcessPPL(pid);
 			// 设置目标进程名称
 			SetTargetProcessName(processname);
 			printf("[+] target process name set in kernel successfully\n");

@@ -2,12 +2,12 @@
   ConsoleApplication1.cpp
 d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1870): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 2 has type 'DWORD64'
 d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1880): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 2 has type 'DWORD64'
-d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(2226): warning C4101: 'DirectoryObject': unreferenced local variable
-d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(3192): warning C4312: 'type cast': conversion from 'DWORD' to 'HANDLE' of greater size
-d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(3193): warning C4477: 'printf' : format string '%x' requires an argument of type 'unsigned int', but variadic argument 1 has type 'HANDLE'
-d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(3193): warning C4313: 'printf': '%x' in format string conflicts with argument 1 of type 'HANDLE'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(2229): warning C4101: 'DirectoryObject': unreferenced local variable
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(3195): warning C4312: 'type cast': conversion from 'DWORD' to 'HANDLE' of greater size
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(3196): warning C4477: 'printf' : format string '%x' requires an argument of type 'unsigned int', but variadic argument 1 has type 'HANDLE'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(3196): warning C4313: 'printf': '%x' in format string conflicts with argument 1 of type 'HANDLE'
   Generating code
-d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(2208): warning C4715: 'getinfoaddrfromheader': not all control paths return a value
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(2211): warning C4715: 'getinfoaddrfromheader': not all control paths return a value
   All 643 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   ConsoleApplication1.vcxproj -> D:\WorkBackup\dev_tools\杀软用户进程启动调试\obcallback\x64\Release\AVDebugUserMode.exe
