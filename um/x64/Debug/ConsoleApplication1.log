@@ -1,0 +1,13 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (ConsoleApplication1.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  ConsoleApplication1.cpp
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(400): warning C4101: 'MaxHeapAllocatedBlockSize': unreferenced local variable
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1173): warning C4477: 'printf' : format string '%08X' requires an argument of type 'unsigned int', but variadic argument 1 has type 'HANDLE'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1173): warning C4313: 'printf': '%X' in format string conflicts with argument 1 of type 'HANDLE'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1180): warning C4129: 'O': unrecognized character escape sequence
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1180): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 1 has type 'DWORD64'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1303): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 1 has type 'ULONG_PTR'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1360): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 1 has type 'DWORD64'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1366): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 1 has type 'DWORD64'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1565): warning C4101: 'DirectoryObject': unreferenced local variable
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1547): warning C4715: 'getinfoaddrfromheader': not all control paths return a value
+  ConsoleApplication1.vcxproj -> D:\WorkBackup\dev_tools\杀软用户进程启动调试\obcallback\x64\Debug\AVDebugUserMode.exe

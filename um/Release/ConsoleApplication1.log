@@ -1,0 +1,9 @@
+﻿  ConsoleApplication1.cpp
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1815): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 2 has type 'DWORD64'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(1825): warning C4477: 'printf' : format string '%p' requires an argument of type 'void *', but variadic argument 2 has type 'DWORD64'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(2123): warning C4101: 'DirectoryObject': unreferenced local variable
+  Generating code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\um\consoleapplication1.cpp(2105): warning C4715: 'getinfoaddrfromheader': not all control paths return a value
+  All 671 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  ConsoleApplication1.vcxproj -> D:\WorkBackup\dev_tools\杀软用户进程启动调试\obcallback\x64\Release\AVDebugUserMode.exe

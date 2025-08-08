@@ -1,0 +1,31 @@
+﻿  Building 'ObCallbackTest' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
+  Stamping Debug\obcallbacktest.inf [Version] section with DriverVer=07/28/2025,16.56.29.791
+MSBUILD : warning 2083: Section [defaultinstall.ntx86.10.0...25952] not referenced or used.
+MSBUILD : warning 2083: Section [defaultinstall.ntx86.10.0...25952.services] not referenced or used.
+MSBUILD : warning 2083: Section [obcallbacktest.service] not referenced or used.
+MSBUILD : warning 2083: Section [obcallbacktest.addregistry] not referenced or used.
+MSBUILD : warning 2083: Section [obcallbacktest.files] not referenced or used.
+  pchsrc.c
+  callback.c
+  tdriver.c
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(338): warning C4305: 'type cast': truncation from 'DWORD64' to 'UCHAR *'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(370): warning C4305: 'type cast': truncation from 'DWORD64' to 'UCHAR *'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(536): warning C4267: '=': conversion from 'size_t' to 'USHORT', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(553): warning C4204: nonstandard extension used: non-constant aggregate initializer
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(581): warning C4047: '=': 'PEPROCESS' differs in levels of indirection from 'DWORD64'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(590): warning C4047: '=': 'DWORD64' differs in levels of indirection from 'PEPROCESS'
+  util.c
+  Generating Code...
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(603): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(606): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(610): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(613): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(621): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(626): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(629): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(639): warning C4702: unreachable code
+  ObCallbackTest.vcxproj -> D:\WorkBackup\dev_tools\杀软用户进程启动调试\obcallback\driver\Debug\ObCallbackTest.sys
+  Done Adding Additional Store
+  Successfully signed: D:\WorkBackup\dev_tools\\obcallback\driver\Debug\ObCallbackTest.sys
+  
+C:\Program Files (x86)\Windows Kits\10\build\WindowsDriver.common.targets(1746,5): error MSB3721: The command ""C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\ApiValidator.exe" -DriverPackagePath:D:\WorkBackup\dev_tools\杀软用户进程启动调试\obcallback\driver\Debug\ -SupportedApiXmlFiles:"C:\Program Files (x86)\Windows Kits\10\build\universalDDIs\x86\UniversalDDIs.xml" -ModuleWhiteListXmlFiles:"C:\Program Files (x86)\Windows Kits\10\build\universalDDIs\x86\ModuleWhiteList.xml" -ApiExtractorExePath:"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64"" exited with code 2.

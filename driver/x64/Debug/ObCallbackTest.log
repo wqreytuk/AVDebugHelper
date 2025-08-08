@@ -1,0 +1,93 @@
+﻿  Building 'ObCallbackTest' with toolset 'WindowsKernelModeDriver10.0' and the 'Universal' target platform.
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  Stamping x64\Debug\obcallbacktest.inf [Version] section with DriverVer=08/08/2025,10.24.21.402
+MSBUILD : warning 2083: Section [defaultinstall.ntamd64.10.0...25952] not referenced or used.
+MSBUILD : warning 2083: Section [defaultinstall.ntamd64.10.0...25952.services] not referenced or used.
+MSBUILD : warning 2083: Section [obcallbacktest.service] not referenced or used.
+MSBUILD : warning 2083: Section [obcallbacktest.addregistry] not referenced or used.
+MSBUILD : warning 2083: Section [obcallbacktest.files] not referenced or used.
+  pchsrc.c
+  callback.c
+  tdriver.c
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(613): warning C4033: 'ListProcessModules' must return a value
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(800): warning C4267: '=': conversion from 'size_t' to 'USHORT', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(817): warning C4204: nonstandard extension used: non-constant aggregate initializer
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(866): warning C4047: '=': 'PEPROCESS' differs in levels of indirection from 'DWORD64'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(874): warning C4047: '=': 'DWORD64' differs in levels of indirection from 'PEPROCESS'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(859): warning C4101: 'unicodeStr': unreferenced local variable
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1012): warning C4022: 'MmCopyVirtualMemory': pointer mismatch for actual parameter 2
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1018): warning C4133: 'function': incompatible types - from 'int *' to 'PSIZE_T'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1047): warning C4022: 'MmCopyVirtualMemory': pointer mismatch for actual parameter 4
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1051): warning C4047: 'function': 'PSIZE_T' differs in levels of indirection from 'int'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1051): warning C4024: 'MmCopyVirtualMemory': different types for formal and actual parameter 7
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1000): warning C4189: 'status': local variable is initialized but not referenced
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1100): warning C4273: 'RtlGetVersion': inconsistent dll linkage
+  c:\program files (x86)\windows kits\10\include\10.0.16299.0\km\wdm.h(14280): note: see previous definition of 'RtlGetVersion'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1621): warning C4057: 'function': 'UCHAR *' differs in indirection to slightly different base types from 'PCHAR'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2012): warning C4133: 'function': incompatible types - from 'DWORD64 *' to 'PCSZ'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2034): warning C4242: '=': conversion from 'DWORD64' to 'int', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2035): warning C4242: 'function': conversion from 'DWORD64' to 'int', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2042): warning C4133: 'function': incompatible types - from 'UCHAR *' to 'PANSI_STRING'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2047): warning C4022: 'memcpy': pointer mismatch for actual parameter 2
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2060): warning C4242: 'function': conversion from 'DWORD64' to 'DWORD', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2067): warning C4133: 'function': incompatible types - from 'DWORD64 *' to 'UCHAR *'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2072): warning C4242: 'function': conversion from 'DWORD64' to 'DWORD', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2116): warning C4242: '=': conversion from 'DWORD64' to 'DWORD', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2117): warning C4242: '=': conversion from 'DWORD64' to 'int', possible loss of data
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2023): warning C4047: 'initializing': 'int' differs in levels of indirection from 'HANDLE'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2148): warning C4047: 'initializing': 'ULONG_PTR' differs in levels of indirection from 'PVOID'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2149): warning C4047: 'initializing': 'ULONG_PTR' differs in levels of indirection from 'PVOID'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2166): warning C4022: 'IoAllocateMdl': pointer mismatch for actual parameter 1
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2229): warning C4022: 'PsLookupProcessByProcessId': pointer mismatch for actual parameter 1
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2239): warning C4033: 'CheckProcessPPL' must return a value
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2288): warning C4098: 'TerminateTargetProcess': 'void' function returning a value
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2293): warning C4047: '=': 'HANDLE' differs in levels of indirection from 'int'
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2301): warning C4022: 'PsLookupProcessByProcessId': pointer mismatch for actual parameter 1
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2304): warning C4098: 'TerminateTargetProcess': 'void' function returning a value
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2313): warning C4189: 'userRtluserthreadstartFunctionAddr': local variable is initialized but not referenced
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2356): warning C4022: 'GetModulePathFromAddress': pointer mismatch for actual parameter 1
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2356): warning C4090: 'initializing': different 'const' qualifiers
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2355): warning C4189: 'targetFn': local variable is initialized but not referenced
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2365): warning C4022: 'PsLookupProcessByProcessId': pointer mismatch for actual parameter 1
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2415): warning C4033: 'ChangeCallbackFunctionToXoreax_eax_ret' must return a value
+  util.c
+  Generating Code...
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(651): warning C4715: 'ListProcessModules': not all control paths return a value
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(890): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(893): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(897): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(900): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(918): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(923): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(926): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(936): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(999): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1024): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1026): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1027): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1032): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1033): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1039): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1040): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1057): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1315): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1326): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1331): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1333): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1338): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1340): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1346): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1352): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(1361): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2261): warning C4715: 'CheckProcessPPL': not all control paths return a value
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2300): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2303): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2306): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2310): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2348): warning C4702: unreachable code
+d:\workbackup\dev_tools\杀软用户进程启动调试\obcallback\driver\tdriver.c(2437): warning C4715: 'ChangeCallbackFunctionToXoreax_eax_ret': not all control paths return a value
+  ObCallbackTest.vcxproj -> D:\WorkBackup\dev_tools\杀软用户进程启动调试\obcallback\driver\x64\Debug\..\..\..\x64\release\ObCallbackTest.sys
+  Done Adding Additional Store
+  Successfully signed: D:\WorkBackup\dev_tools\\obcallback\driver\x64\Debug\..\..\..\x64\release\ObCallbackTest.sys
+  
+C:\Program Files (x86)\Windows Kits\10\build\WindowsDriver.common.targets(1746,5): error MSB3721: The command ""C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64\ApiValidator.exe" -DriverPackagePath:D:\WorkBackup\dev_tools\杀软用户进程启动调试\obcallback\x64\release\ -SupportedApiXmlFiles:"C:\Program Files (x86)\Windows Kits\10\build\universalDDIs\x64\UniversalDDIs.xml" -ModuleWhiteListXmlFiles:"C:\Program Files (x86)\Windows Kits\10\build\universalDDIs\x64\ModuleWhiteList.xml" -ApiExtractorExePath:"C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x64"" exited with code 2.
