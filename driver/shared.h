@@ -158,3 +158,5 @@ typedef struct _Msg {
 #define  enum_AskKernelIfTargetProcessIsCrashed 10
 #define enum_RestoreObjectCallback 11
 #define enum_SetTargetProcessFolderPath 12
+#define enum_SetTargetProcessAbsFullPath 13
+#define enum_SetEPOff 14

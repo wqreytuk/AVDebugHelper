@@ -12,9 +12,9 @@
 #include <array>
 #include <shlwapi.h>
 #include <iostream>
-
+VOID  SetEntryPointOffsetOfTargetProcess(int off);
 #pragma comment(lib, "shlwapi.lib")
-
+VOID SetFullPathInKernel(char* p);
 VOID  SetTargetProcessFolderPath(char* processName);
 int ExtractDir(char* out) {
 	char path[MAX_PATH] = "C:\\Users\\Public\\Documents\\example.txt";
@@ -52,7 +52,7 @@ VOID SetTargetProcessName(char* processName );
 #include <iostream>
 #include <vector>
 
-bool GetPEEntryPointBytes(const char* filePath, std::vector<BYTE>& entryBytes) {
+int GetPEEntryPointBytes(const char* filePath, std::vector<BYTE>& entryBytes) {
 	HMODULE hNtdll;
 	FARPROC pRtlUserThreadStart;
 	DWORD epFOA = 0;
@@ -80,7 +80,7 @@ bool GetPEEntryPointBytes(const char* filePath, std::vector<BYTE>& entryBytes) {
 		std::cerr << "Failed to map file view.\n";
 		return false;
 	}
-
+	int retv = 0;
 	// Parse DOS header
 	IMAGE_DOS_HEADER* dosHeader = (IMAGE_DOS_HEADER*)base;
 	if (dosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
@@ -103,6 +103,7 @@ bool GetPEEntryPointBytes(const char* filePath, std::vector<BYTE>& entryBytes) {
 		DWORD endRVA = startRVA + section->Misc.VirtualSize;
 
 		if (epRVA >= startRVA && epRVA < endRVA) {
+			retv = epRVA - section->VirtualAddress;
 			epFOA = epRVA - section->VirtualAddress + section->PointerToRawData;
 			break;
 		}
@@ -121,14 +122,13 @@ bool GetPEEntryPointBytes(const char* filePath, std::vector<BYTE>& entryBytes) {
 
 	  pRtlUserThreadStart = GetProcAddress(hNtdll, "RtlUserThreadStart");
 
-
+	  entryBytes.assign(epFOA+ base, epFOA + base +3);
 	// Read 0x10 bytes at the entry point
-	entryBytes.assign((BYTE*)pRtlUserThreadStart , (BYTE*)pRtlUserThreadStart + preSetEntryRoutineHeadBytesCount);
+	  //entryBytes.assign((BYTE*)pRtlUserThreadStart, (BYTE*)pRtlUserThreadStart + preSetEntryRoutineHeadBytesCount);
 	UnmapViewOfFile(base);
 	CloseHandle(hMapping);
 	CloseHandle(hFile);
-	return true;
-
+	return epRVA;
 cleanup:
 	UnmapViewOfFile(base);
 	CloseHandle(hMapping);
@@ -1979,11 +1979,16 @@ breakout:
 			memset(processname, 0, sizeof(processname));
 			GetProcessPathByPid(pid, processname); 
 			printf("[*] target process full path: \n\t%s\n", processname);
-			ExtractDir(processname);
-			printf("[*] target process installation folder: %s\n", processname);
-			SetTargetProcessFolderPath(processname);
-			std::vector<BYTE> entryBytes;
 			BYTE entryRoutine[preSetEntryRoutineHeadBytesCount] = { 0 };
+			std::vector<BYTE> entryBytes;
+			int entryOff = GetPEEntryPointBytes(processname, entryBytes);
+			printf("[*] original first bytes of target PE entry point: 0x%02x\n", entryBytes[0]);
+			SetFullPathInKernel(processname);
+			ExtractDir(processname);
+			printf("[*] target process installation folder: \n\t%s\n", processname);
+			SetTargetProcessFolderPath(processname);
+			
+			SetEntryPointOffsetOfTargetProcess(entryOff);
 			// if (GetPEEntryPointBytes(processname, entryBytes)) {
 			// //	std::cout << "Entry Point First 0x10 Bytes: ";
 			// 	int i = 0;
@@ -3199,7 +3204,129 @@ VOID TerminateTargetProcess(int pid) {
 		free(msg);
 		CloseHandle(hDevice);
 	}
+VOID SetFullPathInKernel(char* p) {
+	Msg* msg = (Msg*)malloc(sizeof(Msg));
+	memset(msg, 0, sizeof(Msg));
+	msg->cmdType = enum_SetTargetProcessAbsFullPath;
+	memcpy(&msg->a1, p, strlen(p));
 
+
+	HANDLE hDevice = CreateFile("\\\\.\\ObCallbackTest",
+		GENERIC_READ | GENERIC_WRITE,
+		0,
+		NULL,
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL);
+
+	if (hDevice == INVALID_HANDLE_VALUE) {
+		printf("can't open custom kernel driver, error code: %d\n", GetLastError());
+		return;
+	}
+
+	//
+	// Printing Input & Output buffer pointers and size
+	//
+
+	//printf("InputBuffer Pointer = %p, BufLength = %Iu\n", InputBuffer,
+	//	sizeof(InputBuffer));
+	//printf("OutputBuffer Pointer = %p BufLength = %Iu\n", OutputBuffer,
+	//	sizeof(OutputBuffer));
+	//
+	// Performing METHOD_BUFFERED
+	//
+
+	StringCbCopy(InputBuffer, sizeof(InputBuffer),
+		"This String is from User Application; using METHOD_BUFFERED");
+
+	// printf("\nCalling DeviceIoControl METHOD_BUFFERED:\n");
+
+	memset(OutputBuffer, 0, sizeof(OutputBuffer));
+	DWORD bytesReturned = 0;
+	bool bRc = DeviceIoControl(hDevice,
+		(DWORD)IOCTL_SIOCTL_METHOD_BUFFERED,
+		msg,
+		sizeof(Msg),
+		&OutputBuffer,
+		sizeof(OutputBuffer),
+		&bytesReturned,
+		NULL
+	);
+
+	if (!bRc)
+	{
+		printf("Error in DeviceIoControl from function ChangeCallbackFunctionToXoreax_eax_ret: %d", GetLastError());
+		free(msg);
+		CloseHandle(hDevice);
+		return;
+
+	}
+	//printf("    OutBuffer (%d): %s\n", bytesReturned, OutputBuffer);
+	free(msg);
+	CloseHandle(hDevice);
+}
+
+VOID  SetEntryPointOffsetOfTargetProcess(int off){
+	Msg* msg = (Msg*)malloc(sizeof(Msg));
+	memset(msg, 0, sizeof(Msg));
+	msg->cmdType = enum_SetEPOff;
+	msg->a1 = off;// processName, strlen(processName));
+
+
+	HANDLE hDevice = CreateFile("\\\\.\\ObCallbackTest",
+		GENERIC_READ | GENERIC_WRITE,
+		0,
+		NULL,
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL);
+
+	if (hDevice == INVALID_HANDLE_VALUE) {
+		printf("can't open custom kernel driver, error code: %d\n", GetLastError());
+		return;
+	}
+
+	//
+	// Printing Input & Output buffer pointers and size
+	//
+
+	//printf("InputBuffer Pointer = %p, BufLength = %Iu\n", InputBuffer,
+	//	sizeof(InputBuffer));
+	//printf("OutputBuffer Pointer = %p BufLength = %Iu\n", OutputBuffer,
+	//	sizeof(OutputBuffer));
+	//
+	// Performing METHOD_BUFFERED
+	//
+
+	StringCbCopy(InputBuffer, sizeof(InputBuffer),
+		"This String is from User Application; using METHOD_BUFFERED");
+
+	// printf("\nCalling DeviceIoControl METHOD_BUFFERED:\n");
+
+	memset(OutputBuffer, 0, sizeof(OutputBuffer));
+	DWORD bytesReturned = 0;
+	bool bRc = DeviceIoControl(hDevice,
+		(DWORD)IOCTL_SIOCTL_METHOD_BUFFERED,
+		msg,
+		sizeof(Msg),
+		&OutputBuffer,
+		sizeof(OutputBuffer),
+		&bytesReturned,
+		NULL
+	);
+
+	if (!bRc)
+	{
+		printf("Error in DeviceIoControl from function ChangeCallbackFunctionToXoreax_eax_ret: %d", GetLastError());
+		free(msg);
+		CloseHandle(hDevice);
+		return;
+
+	}
+	//printf("    OutBuffer (%d): %s\n", bytesReturned, OutputBuffer);
+	free(msg);
+	CloseHandle(hDevice);
+}
 VOID  SetTargetProcessFolderPath(char* processName) {
 	Msg* msg = (Msg*)malloc(sizeof(Msg));
 	memset(msg, 0, sizeof(Msg));

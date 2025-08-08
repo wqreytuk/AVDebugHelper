@@ -19,6 +19,7 @@ Notice:
 #include "pch.h"
 #include "tdriver.h"
 #include "wpp.h"
+int gEPOff;
 int gRtlUserThreadStartOff;
 #include "tdriver.tmh"
 int gETHREAD_StartAddrOff;
@@ -315,8 +316,9 @@ BOOLEAN TdProcessNotifyRoutineSet2 = FALSE;
 // allow filter the requested access
 BOOLEAN TdbProtectName = FALSE;
 BOOLEAN TdbRejectName = FALSE;
-PUNICODE_STRING gTargetProcessName; 
+PUNICODE_STRING gTargetProcessName;
 PUNICODE_STRING gTargetProcessFolderPath;
+PUNICODE_STRING gTagetProcessFullPath;
 //
 // Function declarations
 //
@@ -618,9 +620,9 @@ VOID KmExtsPsCreateThreadNotifyRoutineEx(
 	HANDLE ThreadId,
 	BOOLEAN Create);
 DWORD64 GMyTargetPId;
-int ListProcessModules(HANDLE pid, PUNICODE_STRING sgTargetProcessFolderPath)
+DWORD64 ListProcessModules(HANDLE pid, PUNICODE_STRING sgTargetProcessFolderPath)
 {
-	int ret = 0;
+	DWORD64 ret = 0;
 	PEPROCESS Process;
 	KAPC_STATE apc;
 	PPEB Peb;
@@ -652,8 +654,9 @@ int ListProcessModules(HANDLE pid, PUNICODE_STRING sgTargetProcessFolderPath)
 			if (LdrEntry->FullDllName.Buffer) {
 				// Safe because we are attached to the process
 		 
-				if (RtlPrefixUnicodeString(sgTargetProcessFolderPath, &LdrEntry->FullDllName, TRUE)) {
-					ret = 1;
+				if (RtlEqualUnicodeString(sgTargetProcessFolderPath, &LdrEntry->FullDllName, TRUE)) {
+					
+					ret = LdrEntry->DllBase;
 					break;
 				}
 			}
@@ -772,6 +775,8 @@ NTSTATUS FLTAPI InstanceFilterUnloadCallback(FLT_FILTER_UNLOAD_FLAGS Flags) {
 	ExFreePool(TargetProcessName);
 	ExFreePool(gTargetProcessFolderPath->Buffer);
 	ExFreePool(gTargetProcessFolderPath);
+	ExFreePool(gTagetProcessFullPath->Buffer);
+	ExFreePool(gTagetProcessFullPath);
 	
 	
     return STATUS_SUCCESS;
@@ -981,6 +986,246 @@ VOID ResumeSleepThread() {
 	EndLoop = 1;
 	AvReleaseResource(&g.fs_ep_lock);
 }
+
+#define TAG 'mUsr' // pool tag
+
+EXTERN_C NTSTATUS
+NTAPI
+ZwProtectVirtualMemory(
+	_In_ HANDLE ProcessHandle,
+	_Inout_ PVOID *BaseAddress,
+	_Inout_ PSIZE_T RegionSize,
+	_In_ ULONG NewProtect,
+	_Out_ PULONG OldProtect
+);
+NTSTATUS
+WriteUserMemoryFromKernel(
+	_In_ PEPROCESS Process,
+	_In_ PVOID  UserAddress,        // target user-mode virtual address (in target process)
+	_In_ PVOID  Buffer,             // source buffer in kernel
+	_In_ SIZE_T Length
+)
+{
+	KAPC_STATE apcState;
+	NTSTATUS status = STATUS_SUCCESS;
+	PVOID baseAddress = UserAddress;
+	SIZE_T regionSize = Length;
+	ULONG oldProtect = 0;
+	ULONG newProtect = PAGE_EXECUTE_READWRITE; // allow writing to code pages
+	PVOID kBackup = NULL;
+
+	// Allocate backup so we can restore if needed (optional)
+	kBackup = ExAllocatePoolWithTag(NonPagedPoolNx, Length, TAG);
+	if (kBackup == NULL) {
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+
+	// Attach to the target process context
+	KeStackAttachProcess(Process, &apcState);
+
+	// Change protection to RWX (so we can write)
+	// Note: ZwProtectVirtualMemory expects a pointer to PVOID base and SIZE_T length
+	status = ZwProtectVirtualMemory(
+		ZwCurrentProcess(),
+		&baseAddress,
+		&regionSize,
+		newProtect,
+		&oldProtect
+	);
+
+	if (!NT_SUCCESS(status)) {
+		DbgPrint("WriteUserMemoryFromKernel: ZwProtectVirtualMemory -> 0x%X\n", status);
+		goto cleanup_detach;
+	}
+
+	// Optional: save original bytes
+	__try {
+		RtlCopyMemory(kBackup, UserAddress, Length);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		status = GetExceptionCode();
+		DbgPrint("WriteUserMemoryFromKernel: save original failed 0x%X\n", status);
+		goto restore_protect;
+	}
+
+	// Perform the write. Use __try/__except to catch bad writes.
+	__try {
+		// If Buffer is kernel memory, just copy directly.
+		RtlCopyMemory(UserAddress, Buffer, Length);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		status = GetExceptionCode();
+		DbgPrint("WriteUserMemoryFromKernel: write failed 0x%X\n", status);
+
+		// attempt to restore original bytes even if write failed
+		__try {
+			RtlCopyMemory(UserAddress, kBackup, Length);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			DbgPrint("WriteUserMemoryFromKernel: restore after failed write also faulted\n");
+		}
+
+		goto restore_protect;
+	}
+
+restore_protect:
+	// Restore original protection
+	{
+		PVOID restoreBase = UserAddress;
+		SIZE_T restoreSize = Length;
+		ULONG tmpOld = 0;
+
+		NTSTATUS s2 = ZwProtectVirtualMemory(
+			ZwCurrentProcess(),
+			&restoreBase,
+			&restoreSize,
+			(ULONG)oldProtect,
+			&tmpOld
+		);
+
+		if (!NT_SUCCESS(s2)) {
+			DbgPrint("WriteUserMemoryFromKernel: failed to restore protection 0x%X\n", s2);
+			// continue; we still need to detach
+		}
+	}
+
+cleanup_detach:
+	KeUnstackDetachProcess(&apcState);
+
+	if (kBackup) ExFreePoolWithTag(kBackup, TAG);
+
+	return status;
+}
+NTSTATUS
+PatchUserCode(
+	_In_ PEPROCESS TargetProcess,
+	_In_ PVOID TargetAddress,
+	_In_reads_bytes_(PatchSize) PVOID PatchBytes,
+	_In_ SIZE_T PatchSize
+)
+{
+	NTSTATUS status;
+	HANDLE processHandle = NULL;
+	KAPC_STATE apcState;
+	ULONG oldProtect = 0;
+	PVOID baseAddress = NULL;
+	SIZE_T regionSize = 0;
+
+	if (!TargetProcess || !TargetAddress || !PatchBytes || PatchSize == 0)
+		return STATUS_INVALID_PARAMETER;
+
+	// Open a kernel handle to the target process
+	status = ObOpenObjectByPointer(
+		TargetProcess,
+		OBJ_KERNEL_HANDLE,
+		NULL,
+		0x0038,
+		*PsProcessType,
+		KernelMode,
+		&processHandle
+	);
+
+	if (!NT_SUCCESS(status))
+		return status;
+
+	// Align base address down to page boundary
+	baseAddress = (PVOID)((ULONG_PTR)TargetAddress & ~(PAGE_SIZE - 1));
+
+	// Calculate region size including offset inside page
+	regionSize = ((ULONG_PTR)TargetAddress + PatchSize + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
+	regionSize -= (ULONG_PTR)baseAddress;
+
+	// Attach to the target process address space
+	KeStackAttachProcess(TargetProcess, &apcState);
+
+	// Change page protection to RWX to allow writing
+	status = ZwProtectVirtualMemory(
+		processHandle,
+		&baseAddress,
+		&regionSize,
+		PAGE_EXECUTE_READWRITE,
+		&oldProtect
+	);
+
+	if (NT_SUCCESS(status)) {
+		__try {
+			// Write patch bytes to target address
+			RtlCopyMemory(TargetAddress, PatchBytes, PatchSize);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			status = GetExceptionCode();
+		}
+
+		// Restore original protection
+		ZwProtectVirtualMemory(processHandle, &baseAddress, &regionSize, oldProtect, &oldProtect);
+	}
+
+	// Detach from process
+	KeUnstackDetachProcess(&apcState);
+
+	// No need to ZwClose because handle was opened with OBJ_KERNEL_HANDLE
+	return status;
+}
+
+PVOID GetProcessImageBase(PEPROCESS Process)
+{
+	PVOID imageBase = NULL;
+	PPEB peb = NULL;
+
+	__try {
+		peb = PsGetProcessPeb(Process);
+		if (peb) {
+			// Probe and read the ImageBaseAddress safely
+			imageBase = peb->ImageBaseAddress;
+		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		imageBase = NULL;
+	}
+
+	return imageBase;
+}
+NTSTATUS
+PatchProcessImageAtOffset(
+	_In_ PEPROCESS Process,
+	_In_ SIZE_T Offset,
+	_In_reads_bytes_(PatchSize) PVOID PatchBytes,
+	_In_ SIZE_T PatchSize
+)
+{
+	NTSTATUS status;
+	PVOID imageBase = NULL;
+	PVOID patchAddress = NULL;
+
+	if (!Process || !PatchBytes || PatchSize == 0)
+		return STATUS_INVALID_PARAMETER;
+
+	// Try to get image base from PEB directly
+	__try {
+		PPEB peb = PsGetProcessPeb(Process);
+		if (peb && peb->ImageBaseAddress) {
+			imageBase = peb->ImageBaseAddress;
+		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		imageBase = NULL;
+	}
+
+	// If failed, try fallback (if PsGetProcessSectionBaseAddress exported)
+	if (!imageBase) {
+		imageBase = GetProcessImageBase(Process);
+	}
+
+	if (!imageBase)
+		return STATUS_UNSUCCESSFUL;
+
+	patchAddress = (PVOID)((ULONG_PTR)imageBase + Offset);
+
+	// Patch user code safely
+	status = PatchUserCode(Process, patchAddress, PatchBytes, PatchSize);
+
+	return status;
+}
 VOID
 KmExtsPsCreateThreadNotifyRoutineEx(
     HANDLE ProcessId,
@@ -1006,8 +1251,29 @@ KmExtsPsCreateThreadNotifyRoutineEx(
 		DbgPrint("put target process's thread 0x%x into sleep\n", ThreadId);
 		// 等目标进程的peb dll列表中存在他自己路径下的dll的时候再开始sleep 感觉应该是可以的
  
-		
-		if (ListProcessModules(ProcessId, gTargetProcessFolderPath)) { 
+		DWORD64 base = ListProcessModules(ProcessId, gTagetProcessFullPath);
+		if (base){
+
+			// 那我他妈的要不要把  目标进程的enrtypoint改成int3呢
+			// 此时PEB中已经有了exe，那么我们此时选择将其entry point改为int 3
+			// 
+
+
+				/*
+				WriteUserMemoryFromKernel(
+	_In_ PEPROCESS Process,
+	_In_ PVOID  UserAddress,        // target user-mode virtual address (in target process)
+	_In_ PVOID  Buffer,             // source buffer in kernel
+	_In_ SIZE_T Length
+)
+				*/
+		// //  这样操作完了之后跟以前的效果是一样的，附加调试器之后还是已经运行到后面的地方了
+		// 	PEPROCESS targetEP = 0;
+		// PsLookupProcessByProcessId(ProcessId, &targetEP);
+		// UCHAR a[1] = { 0xcc };
+		// WriteUserMemoryFromKernel(targetEP, gEPOff + base, a, 1);
+
+
 
 			//直接把所有的线程都睡了算了
 			while (1) {
@@ -1018,6 +1284,35 @@ KmExtsPsCreateThreadNotifyRoutineEx(
 				interval.QuadPart = -10 * 1000 * 1000;  // Negative for relative time; 1 second = 10 million 100 ns units
 				KeDelayExecutionThread(KernelMode, FALSE, &interval);
 			}
+		}
+		else {
+
+		/*
+		NTSTATUS
+PatchProcessImageAtOffset(
+	_In_ PEPROCESS Process,
+	_In_ SIZE_T Offset,
+	_In_reads_bytes_(PatchSize) PVOID PatchBytes,
+	_In_ SIZE_T PatchSize
+)
+)
+		*/
+		//	)
+			// 这样也不太行，最稳妥的还是直接patch成int3，然后在内核调试器里面进行调试
+			char kasi[3] = { 0x90,0xeb,0xfd };
+			PEPROCESS targetEP = 0; UCHAR a[1] = { 0xcc };
+	 PsLookupProcessByProcessId(ProcessId, &targetEP);
+	 PatchProcessImageAtOffset(targetEP, gEPOff, a,1);
+
+
+		// while (1) {
+		// 	// Your loop code here
+		// 	if (EndLoop)break;
+		// 	// Sleep for 1 second (1000 ms)
+		// 	LARGE_INTEGER interval;
+		// 	interval.QuadPart = -10 * 1000 * 1000;  // Negative for relative time; 1 second = 10 million 100 ns units
+		// 	KeDelayExecutionThread(KernelMode, FALSE, &interval);
+		// }
 		}
 	}
 	else
@@ -1157,7 +1452,7 @@ DriverEntry(
 )
 { 
 
-	//DbgBreakPoint();
+ // DbgBreakPoint();
 
 
 	// PLIST_ENTRY list = (PLIST_ENTRY)PsLoadedModuleList;
@@ -1179,7 +1474,8 @@ DriverEntry(
 	g.fs_ep = 0;
 	g.pid = 0;
 	AllocateUnicodeString2(&gTargetProcessName, 250);
-	AllocateUnicodeString2(&gTargetProcessFolderPath, 250);
+	AllocateUnicodeString2(&gTargetProcessFolderPath, 250); 
+		AllocateUnicodeString2(&gTagetProcessFullPath, 250);
     WCHAR phder[0x100]=L"LLLLLLLLLLLllllllllllllllllllllllllllllLLLLLLLLLLLL";
   
     AllocateUnicodeString(TargetProcessName, phder,&TargetProcessName);
@@ -2033,6 +2329,21 @@ VOID DealMsg(UCHAR* a1,UCHAR* outBuf,DWORD* bytesOut) {
 		}
 	}
 	switch (msg->cmdType) {
+	case enum_SetEPOff: {
+		gEPOff = msg->a1;
+		break;
+	}
+	case enum_SetTargetProcessAbsFullPath: {
+
+		ANSI_STRING ansiStr;
+
+		// Initialize the ANSI_STRING from the char*
+		RtlInitAnsiString(&ansiStr, &msg->a1);
+
+		// Convert to UNICODE_STRING  不需要分配内存，因为我们已经预先分配好了
+		RtlAnsiStringToUnicodeString(gTagetProcessFullPath, &ansiStr, 0);
+		break;
+	}
 	case enum_SetTargetProcessFolderPath: {
 		
 
